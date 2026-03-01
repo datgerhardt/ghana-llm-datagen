@@ -27,7 +27,6 @@ python run.py --code YOUR_VOLUNTEER_CODE
 > Your volunteer code is sent to you by the project owner. It looks like a long string of letters and numbers.
 
 **That's it.** The script will:
-- 🔑 Decode your API key and batch assignment from the code
 - ⬇️ Download your portion of the dataset automatically
 - ⚙️ Generate conversations with a live progress bar
 - 💾 Save results locally with **auto-resume** if interrupted
