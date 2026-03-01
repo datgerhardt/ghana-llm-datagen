@@ -1,5 +1,5 @@
 """
-Ghana LLM Dataset Generator
+Ghana LLM Dataset Generator — Volunteer Entry Point
 =====================================================
 One command. Runs your assigned news data slice, then research data slice, back to back.
 
@@ -41,6 +41,7 @@ import time
 import hashlib
 import urllib.request
 import urllib.error
+import lzma
 import pandas as pd
 from tqdm import tqdm
 import openai
@@ -337,6 +338,23 @@ def load_completed(path: Path) -> set:
     return done
 
 
+
+# ── Zip output ────────────────────────────────────────────────────────────────
+
+def zip_output(jsonl_path: Path) -> Path:
+    """Compress using LZMA (xz) — best compression available in Python stdlib."""
+    xz_path = jsonl_path.with_suffix(".xz")
+    with open(jsonl_path, "rb") as f_in:
+        with lzma.open(xz_path, "wb", preset=9 | lzma.PRESET_EXTREME) as f_out:
+            f_out.write(f_in.read())
+    original_mb   = jsonl_path.stat().st_size / 1_048_576
+    compressed_mb = xz_path.stat().st_size    / 1_048_576
+    ratio         = (1 - compressed_mb / original_mb) * 100 if original_mb else 0
+    print(f"  Compressed: {jsonl_path.name} -> {xz_path.name}  "
+          f"({original_mb:.1f} MB -> {compressed_mb:.1f} MB, {ratio:.0f}% smaller)")
+    return xz_path
+
+
 # ── Run one data type ─────────────────────────────────────────────────────────
 
 def run_type(data_type: str, row_start: int, row_end: int,
@@ -433,7 +451,9 @@ def main():
     res_out   = output_path.parent / f"{res_label}.jsonl"
 
     run_type("news",     info["news_start"], info["news_end"], client, news_out, ultrachat_samples)
+    news_zip = zip_output(news_out)
     run_type("research", info["res_start"],  info["res_end"],  client, res_out,  ultrachat_samples)
+    res_zip  = zip_output(res_out)
 
     # ── Final summary ──────────────────────────────────────────────────────
     total, good = 0, 0
@@ -451,12 +471,12 @@ def main():
 ║  Parsed OK     : {good:<35,} ║
 ╚══════════════════════════════════════════════════════╝
 
-📤  Submit your two result files:
-    {news_out.resolve()}
-    {res_out.resolve()}
-
-Open a GitHub issue at:
-  https://github.com/{GITHUB_REPO}/issues/new?template=result_submission.md
+📤  Submit your results:
+    1. Go to: https://github.com/{GITHUB_REPO}/issues/new?template=result_submission.md
+    2. Fill in the form
+    3. Attach these two zip files (drag into the text box):
+         {news_zip.resolve()}
+         {res_zip.resolve()}
 
 Thank you for contributing to the Ghana LLM project! 🇬🇭
 """)
