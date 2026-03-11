@@ -58,7 +58,7 @@ We have a dahsboard to track progress [here](https://huggingface.co/spaces/ghana
 **Q: How long will it take?**  
 Typically 80–100 hours depending on the api server speed. You can stop and resume the run with progress preserved.
 
-**Q: How long will it take for Async?**  
+**Q: How long will it take for Async version?**  
 Typically 48–72 hours depending on the api server speed. You can stop and resume the run with progress preserved.
 
 **Q: Is the code safe? Is it an API key?**  
